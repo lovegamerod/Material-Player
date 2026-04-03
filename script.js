@@ -366,7 +366,7 @@ function switchToAllSongsContext() {
 function renderNav() {
     const html = Object.keys(playlists).map(key => `
         <div class="nav-item" data-id="${key}" onclick="selectPlaylist('${key}')">
-            <span class="material-symbols-rounded">folder</span><span>${key}</span>
+            <span class="material-icons">folder</span><span>${key}</span>
         </div>
     `).join('');
     
@@ -408,7 +408,7 @@ function renderSongList(songs, isSearch = false) {
             <img src="${s.cover}" class="song-cover-mini" onerror="this.src='https://via.placeholder.com/150'">
             <div class="song-info"><b>${s.title}</b><small>${s.artist}</small></div>
             <button class="download-btn" onclick="event.stopPropagation(); downloadSong('${s.file}', '${s.title}')">
-                <span class="material-symbols-rounded">download</span>
+                <span class="material-icons">download</span>
             </button>
         </div>
     `).join('');
