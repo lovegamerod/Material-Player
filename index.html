@@ -2,145 +2,133 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Material Music Pro</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" />
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
 </head>
 <body>
-    <div id="app-bg" class="app-bg"></div>
-
+    <div class="app-bg" id="app-bg"></div>
     <div class="app-container">
-        <nav class="navigation-rail" id="nav-rail">
+        <nav class="navigation-rail">
             <div class="nav-header">
                 <span class="material-symbols-rounded">library_music</span>
-                <span class="nav-title">我的音乐</span>
+                <span>播放列表</span>
             </div>
-            <div id="playlist-nav" class="nav-items"></div>
+            <div class="nav-items" id="playlist-nav"></div>
         </nav>
 
         <main class="main-content">
-            <header class="top-bar">
-                <div class="title-area" id="mobile-playlist-toggle">
-                    <h1 id="playlist-title">正在加载...</h1>
-                    <span class="material-symbols-rounded expand-icon">expand_more</span>
+            <div class="top-bar">
+                <div class="title-area">
+                    <span class="material-symbols-rounded expand-icon" id="mobile-playlist-toggle">menu</span>
+                    <h1 id="playlist-title">选择播放列表</h1>
                 </div>
                 <div class="search-box">
                     <span class="material-symbols-rounded">search</span>
                     <input type="text" id="search-input" placeholder="搜索歌曲...">
                 </div>
-            </header>
-            
-            <div id="song-list" class="song-list-container"></div>
-            <div style="height: 120px;"></div>
+            </div>
+            <div class="song-list-container" id="song-list"></div>
         </main>
+    </div>
 
-        <div class="player-bar" id="mini-player">
-            <div class="mini-progress-wrapper" id="mini-progress-wrapper">
-                <div class="mini-progress-fill" id="mini-progress-fill"></div>
+    <div class="player-bar" id="mini-player">
+        <div class="mini-progress-wrapper">
+            <div class="mini-progress-fill" id="mini-progress-fill"></div>
+        </div>
+        <div class="track-info-mini hidden">
+            <img id="mini-cover" src="" alt="Cover">
+            <div>
+                <div id="mini-title">歌曲标题</div>
+                <div id="mini-artist">艺术家</div>
             </div>
-            <div class="track-info-mini">
-                <img id="mini-cover" src="" class="hidden">
-                <div class="text">
-                    <div id="mini-title">Material Music</div>
-                    <div id="mini-artist">请选择歌曲播放</div>
+        </div>
+        <div class="controls-mini">
+            <button class="icon-btn" id="btn-prev-mini"><span class="material-symbols-rounded">skip_previous</span></button>
+            <button class="icon-btn-filled" id="btn-play-mini"><span class="material-symbols-rounded">play_arrow</span></button>
+            <button class="icon-btn" id="btn-next-mini"><span class="material-symbols-rounded">skip_next</span></button>
+        </div>
+    </div>
+
+    <div class="lyrics-overlay" id="lyrics-overlay">
+        <button class="close-btn icon-btn" id="btn-close-lyrics"><span class="material-symbols-rounded">close</span></button>
+        
+        <div class="lyrics-layout">
+            <div class="left-side">
+                <div class="cover-container">
+                    <img id="full-cover" src="" alt="Album Cover">
+                </div>
+                <div class="info-container">
+                    <h2 id="full-title">歌曲标题</h2>
+                    <h3 id="full-artist">艺术家</h3>
+                    <div class="tag" id="full-album">专辑名称</div>
                 </div>
             </div>
-            <div class="controls-mini">
-                <button id="btn-prev-mini" class="icon-btn"><span class="material-symbols-rounded">skip_previous</span></button>
-                <button id="btn-play-mini" class="icon-btn-filled"><span class="material-symbols-rounded">play_arrow</span></button>
-                <button id="btn-next-mini" class="icon-btn"><span class="material-symbols-rounded">skip_next</span></button>
+
+            <div id="lyrics-container">
+                <div class="lyrics-track" id="lyrics-track">
+                    <p class="lyric-line" style="text-align:center">暂无歌词</p>
+                </div>
+                <button class="sync-lyrics-btn" id="btn-sync-lyrics">
+                    <span class="material-symbols-rounded">sync</span>
+                </button>
             </div>
         </div>
 
-        <div id="lyrics-overlay" class="lyrics-overlay">
-            <button id="btn-close-lyrics" class="icon-btn close-btn"><span class="material-symbols-rounded">keyboard_arrow_down</span></button>
-            
-            <div class="lyrics-layout">
-                <div class="left-side">
-                    <div class="cover-container">
-                        <img id="full-cover" src="" alt="Album Art">
-                    </div>
-                    <div class="info-container">
-                        <h2 id="full-title">--</h2>
-                        <h3 id="full-artist">--</h3>
-                        <div class="meta-tags">
-                            <span id="full-album" class="tag">专辑</span>
+        <div class="bottom-controls">
+            <div class="progress-section">
+                <span id="time-current">0:00</span>
+                <div class="progress-bar-wrapper" id="full-progress-wrapper">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="full-progress-fill"><div class="progress-handle"></div>
                         </div>
                     </div>
                 </div>
-
-                <div class="right-side" id="lyrics-container">
-                    <div class="lyrics-track" id="lyrics-track"></div>
-                    <button id="btn-sync-lyrics" class="sync-lyrics-btn">
-                        <span class="material-symbols-rounded">vertical_align_center</span>
-                    </button>
-                </div>
+                <span id="time-duration">0:00</span>
             </div>
 
-            <div class="bottom-controls">
-                <div class="progress-section">
-                    <span id="time-current">0:00</span>
-                    <div class="progress-bar-wrapper" id="full-progress-wrapper">
-                        <div class="progress-bar-bg">
-                            <div class="progress-bar-fill" id="full-progress-fill">
-                                <div class="progress-handle"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <span id="time-duration">0:00</span>
-                </div>
-                <div class="buttons-section">
-                    <button id="btn-mode" class="ctrl-btn mode-btn">
-                        <span class="material-symbols-rounded">repeat</span>
-                    </button>
-                    
-                    <button id="btn-prev-full" class="ctrl-btn"><span class="material-symbols-rounded">skip_previous</span></button>
-                    <button id="btn-play-full" class="ctrl-btn play-large"><span class="material-symbols-rounded">play_circle</span></button>
-                    <button id="btn-next-full" class="ctrl-btn"><span class="material-symbols-rounded">skip_next</span></button>
-                    
-                    <div style="width: 40px;"></div> 
-                </div>
-            </div>
-        </div>
-
-        <div id="mobile-nav-drawer" class="mobile-drawer">
-            <div class="drawer-overlay" id="drawer-overlay"></div>
-            <div class="drawer-content">
-                <div class="drawer-header">
-                    <h3>切换歌单</h3>
-                    <button id="close-drawer" class="icon-btn"><span class="material-symbols-rounded">close</span></button>
-                </div>
-                <div id="mobile-playlist-nav" class="drawer-items"></div>
+            <div class="playback-controls">
+                <button class="icon-btn" id="btn-mode"><span class="material-symbols-rounded">repeat</span></button>
+                <button class="icon-btn-large" id="btn-prev-full"><span class="material-symbols-rounded">skip_previous</span></button>
+                <button class="icon-btn-play" id="btn-play-full"><span class="material-symbols-rounded">play_circle</span></button>
+                <button class="icon-btn-large" id="btn-next-full"><span class="material-symbols-rounded">skip_next</span></button>
+                <button class="icon-btn"><span class="material-symbols-rounded">volume_up</span></button>
             </div>
         </div>
     </div>
 
-    <div id="mode-modal" class="mode-modal">
-        <div class="mode-overlay" id="mode-overlay"></div>
-        <div class="mode-content">
-            <div class="mode-header">播放模式</div>
-            <div class="mode-list">
-                <div class="mode-item" data-mode="random_all">
-                    <span class="material-symbols-rounded">shuffle</span>
-                    <span>所有歌曲随机</span>
-                </div>
-                <div class="mode-item" data-mode="random_list">
-                    <span class="material-symbols-rounded">shuffle_on</span>
-                    <span>当前歌单随机</span>
-                </div>
-                <div class="mode-item active" data-mode="sequence">
-                    <span class="material-symbols-rounded">repeat</span>
-                    <span>当前歌单顺序</span>
-                </div>
-                <div class="mode-item" data-mode="single">
-                    <span class="material-symbols-rounded">repeat_one</span>
-                    <span>单曲循环</span>
-                </div>
-            </div>
-            <button class="mode-close" id="mode-close">取消</button>
+    <div class="mode-modal" id="mode-modal">
+        <div class="mode-item active" data-mode="sequence">
+            <span class="material-symbols-rounded">repeat</span>
+            <span>顺序播放</span>
         </div>
+        <div class="mode-item" data-mode="single">
+            <span class="material-symbols-rounded">repeat_one</span>
+            <span>单曲循环</span>
+        </div>
+        <div class="mode-item" data-mode="random_list">
+            <span class="material-symbols-rounded">shuffle_on</span>
+            <span>列表随机</span>
+        </div><div class="mode-item" data-mode="random_all">
+            <span class="material-symbols-rounded">shuffle</span>
+            <span>全部随机</span>
+        </div>
+        <button class="icon-btn" id="mode-close" style="width:100%; justify-content:center;">
+            <span class="material-symbols-rounded">close</span>
+        </button>
     </div>
+    <div class="mode-overlay" id="mode-overlay"></div>
+
+    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+        <div class="drawer-header">
+            <h2>播放列表</h2>
+            <button class="icon-btn" id="close-drawer"><span class="material-symbols-rounded">close</span></button>
+        </div>
+        <div class="nav-items" id="mobile-playlist-nav"></div>
+    </div>
+    <div class="drawer-overlay" id="drawer-overlay"></div>
 
     <audio id="audio-player"></audio>
     <script src="script.js"></script>
