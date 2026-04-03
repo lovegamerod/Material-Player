@@ -11,12 +11,18 @@
     <div class="app-bg" id="app-bg"></div>
     <div class="app-container">
         <nav class="navigation-rail">
-            <div class="nav-header">
-                <span class="material-icons">library_music</span>
-                <span>播放列表</span>
-            </div>
-            <div class="nav-items" id="playlist-nav"></div>
-        </nav>
+    <div class="nav-header">
+        <span class="material-icons">library_music</span>
+        <span>音乐库</span>
+    </div>
+    <div class="nav-item home-item" onclick="selectHome()">
+        <span class="material-icons">home</span>
+        <span>首页</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section-title">播放列表</div>
+    <div class="nav-items" id="playlist-nav"></div>
+</nav>
 
         <main class="main-content">
             <div class="top-bar">
@@ -122,12 +128,18 @@
     <div class="mode-overlay" id="mode-overlay"></div>
 
     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
-        <div class="drawer-header">
-            <h2>播放列表</h2>
-            <button class="icon-btn" id="close-drawer"><span class="material-icons">close</span></button>
-        </div>
-        <div class="nav-items" id="mobile-playlist-nav"></div>
+    <div class="drawer-header">
+        <h2>音乐库</h2>
+        <button class="icon-btn" id="close-drawer"><span class="material-icons">close</span></button>
     </div>
+    <div class="nav-item home-item" onclick="selectHome()">
+        <span class="material-icons">home</span>
+        <span>首页</span>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section-title">播放列表</div>
+    <div class="nav-items" id="mobile-playlist-nav"></div>
+</div>
     <div class="drawer-overlay" id="drawer-overlay"></div>
 
     <audio id="audio-player"></audio>

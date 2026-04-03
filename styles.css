@@ -23,6 +23,7 @@ body { font-family: 'Roboto', -apple-system, sans-serif; background: var(--backg
     display: flex; flex-direction: column; padding: 24px 8px; flex-shrink: 0;
 }
 .nav-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; padding: 8px 12px; color: var(--primary); font-weight: 500; font-size: 1.1rem; }
+.nav-divider { height: 1px; background: var(--divider); margin: 8px 12px; }
 .nav-items { overflow-y: auto; flex: 1; }
 .nav-item {
     display: flex; align-items: center; gap: 12px; padding: 12px 16px;
@@ -37,7 +38,18 @@ body { font-family: 'Roboto', -apple-system, sans-serif; background: var(--backg
 .nav-item:hover::before { opacity: 0.08; }
 .nav-item:active { transform: scale(0.96); }
 .nav-item.active { background: rgba(25, 118, 210, 0.12); color: var(--primary); font-weight: 500; }
+.nav-section-title {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
 
+.home-item {
+    margin-bottom: 8px;
+}
 .main-content { flex: 1; padding: 0 32px; overflow-y: auto; }
 
 .top-bar {
@@ -58,6 +70,16 @@ body { font-family: 'Roboto', -apple-system, sans-serif; background: var(--backg
 }
 .search-box:focus-within { width: 300px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 .search-box input { border: none; background: transparent; margin-left: 8px; width: 100%; font-size: 15px; }
+
+.home-container { padding-bottom: 100px; }
+.welcome-card {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: white; padding: 40px; border-radius: 16px; margin-bottom: 32px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.welcome-card h2 { font-size: 32px; margin-bottom: 8px; font-weight: 400; }
+.welcome-card p { font-size: 16px; opacity: 0.9; }
+.section-title { font-size: 20px; font-weight: 500; margin-bottom: 16px; color: var(--text-primary); }
 
 .song-list-container { display: grid; gap: 4px; padding-bottom: 100px; }
 .song-item {
@@ -216,6 +238,8 @@ body { font-family: 'Roboto', -apple-system, sans-serif; background: var(--backg
     .title-area h1 { font-size: 24px; }
     .search-box { width: 200px; }
     .search-box:focus-within { width: 240px; }
+    .welcome-card { padding: 24px; }
+    .welcome-card h2 { font-size: 24px; }
     .lyrics-layout { grid-template-columns: 1fr; padding: 60px 20px 20px 20px; }
     .left-side { padding: 20px; }
     .cover-container img { width: 200px; height: 200px; }

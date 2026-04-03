@@ -1,6 +1,6 @@
 # Material Music Pro 🎵
 
-基于 Material Design 3 和 Apple Music 风格的高级音乐播放器。
+基于 Material Design 3风格的音乐播放器。
 
 ## 主要功能
 - **全屏沉浸播放**：动态高斯模糊背景。

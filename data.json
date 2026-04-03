@@ -69,14 +69,14 @@
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - Distortion!! (失真).jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - ReRe",
-      "artist": "Unknown Artist",
+      "title": "Re:Re",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - ReRe.ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - ReRe.jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - UNITE",
-      "artist": "Unknown Artist",
+      "title": "UNITE",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - UNITE.ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - UNITE.jpg"
     },
@@ -123,20 +123,20 @@
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - ラブソングが歌えない (不会唱情歌).jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - 今、僕、アンダーグラウンドから (此刻、我身处、地面之下)",
-      "artist": "Unknown Artist",
+      "title": "今、僕、アンダーグラウンドから (此刻、我身处、地面之下)",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - 今、僕、アンダーグラウンドから (此刻、我身处、地面之下).ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - 今、僕、アンダーグラウンドから (此刻、我身处、地面之下).jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - 光の中へ",
-      "artist": "Unknown Artist",
+      "title": "光の中へ",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - 光の中へ.ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - 光の中へ.jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - 夢を束ねて (把梦想编织在一起)",
-      "artist": "Unknown Artist",
+      "title": "夢を束ねて (把梦想编织在一起)",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - 夢を束ねて (把梦想编织在一起).ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - 夢を束ねて (把梦想编织在一起).jpg"
     },
@@ -153,14 +153,14 @@
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - 星座になれたら (若能化作星座).jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - 月並みに輝け (平凡亦熠)",
-      "artist": "Unknown Artist",
+      "title": "月並みに輝け (平凡亦熠)",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - 月並みに輝け (平凡亦熠).ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - 月並みに輝け (平凡亦熠).jpg"
     },
     {
-      "title": "結束バンド (纽带乐队) - 秒針少女 (秒针少女)",
-      "artist": "Unknown Artist",
+      "title": "秒針少女 (秒针少女)",
+      "artist": "結束バンド (纽带乐队)",
       "file": "/music/Bocchi the rock/結束バンド (纽带乐队) - 秒針少女 (秒针少女).ogg",
       "cover": "/music/Bocchi the rock/結束バンド (纽带乐队) - 秒針少女 (秒针少女).jpg"
     },
@@ -197,8 +197,8 @@
       "cover": "/music/English/Bruno Mars - Chunky.jpg"
     },
     {
-      "title": "Bruno Mars - Talking to the Moon",
-      "artist": "Unknown Artist",
+      "title": "Talking to the Moon",
+      "artist": "Bruno Mars",
       "file": "/music/English/Bruno Mars - Talking to the Moon.ogg",
       "cover": "/music/English/Bruno Mars - Talking to the Moon.jpg"
     },
@@ -235,8 +235,8 @@
   ],
   "MJ": [
     {
-      "title": "Michael Jackson - Billie Jean (Long Version)",
-      "artist": "Unknown Artist",
+      "title": "Billie Jean (Long Version)",
+      "artist": "Michael Jackson",
       "file": "/music/MJ/Michael Jackson - Billie Jean (Long Version).ogg",
       "cover": "/music/MJ/Michael Jackson - Billie Jean (Long Version).jpg"
     },
@@ -341,14 +341,14 @@
       "cover": "/music/More/Chris James - Sugar (Explicit).jpg"
     },
     {
-      "title": "Craig Ruhnke - Ooh Baby",
-      "artist": "Unknown Artist",
+      "title": "Ooh Baby",
+      "artist": "Craig Ruhnke",
       "file": "/music/More/Craig Ruhnke - Ooh Baby.ogg",
       "cover": "/music/More/Craig Ruhnke - Ooh Baby.jpg"
     },
     {
-      "title": "Creepy Nuts - Bling-Bang-Bang-Born",
-      "artist": "Unknown Artist",
+      "title": "Bling-Bang-Bang-Born",
+      "artist": "Creepy Nuts",
       "file": "/music/More/Creepy Nuts - Bling-Bang-Bang-Born.ogg",
       "cover": "/music/More/Creepy Nuts - Bling-Bang-Bang-Born.jpg"
     },
@@ -359,8 +359,8 @@
       "cover": "/music/More/Daniel Powter - Free Loop.jpg"
     },
     {
-      "title": "David Campbell - Can't Take My Eyes Off You",
-      "artist": "Unknown Artist",
+      "title": "Can't Take My Eyes Off You",
+      "artist": "David Campbell",
       "file": "/music/More/David Campbell - Can't Take My Eyes Off You.ogg",
       "cover": "/music/More/David Campbell - Can't Take My Eyes Off You.jpg"
     },
@@ -401,8 +401,8 @@
       "cover": "/music/More/GARNiDELiA (ガルニデリア) - 極楽浄土.jpg"
     },
     {
-      "title": "KOTOKO (ことこ) - 恋ひ恋ふ縁 (以恋结缘) (Game Size)",
-      "artist": "Unknown Artist",
+      "title": "恋ひ恋ふ縁 (以恋结缘) (Game Size)",
+      "artist": "KOTOKO (ことこ)",
       "file": "/music/More/KOTOKO (ことこ) - 恋ひ恋ふ縁 (以恋结缘) (Game Size).ogg",
       "cover": "/music/More/A Cup of Liber - Wilbert Roget II.jpg"
     },
@@ -413,8 +413,8 @@
       "cover": "/music/More/MAX&Chromeo - Checklist(feat. Chromeo).jpg"
     },
     {
-      "title": "Machico (マチコ)&和气杏未 (和氣あず未) - うまぴょい伝説 (马儿跳传说)",
-      "artist": "Unknown Artist",
+      "title": "うまぴょい伝説 (马儿跳传说)",
+      "artist": "Machico (マチコ)&和气杏未 (和氣あず未)",
       "file": "/music/More/Machico (マチコ)&和气杏未 (和氣あず未) - うまぴょい伝説 (马儿跳传说).ogg",
       "cover": "/music/More/Machico (マチコ)&和气杏未 (和氣あず未) - うまぴょい伝説 (马儿跳传说).jpg"
     },
@@ -533,8 +533,8 @@
       "cover": "/music/More/ヨルシカ (Yorushika) - 又三郎.jpg"
     },
     {
-      "title": "ヨルシカ (Yorushika) - 言って。 (说吧。)",
-      "artist": "Unknown Artist",
+      "title": "言って。 (说吧。)",
+      "artist": "ヨルシカ (Yorushika)",
       "file": "/music/More/ヨルシカ (Yorushika) - 言って。 (说吧。).ogg",
       "cover": "/music/More/ヨルシカ (Yorushika) - 言って。 (说吧。).jpg"
     },
@@ -765,8 +765,8 @@
       "cover": "/music/togetoge/トゲナシトゲアリ (TOGENASHI TOGEARI) - 傷つき傷つけ痛くて辛い (彼此忍受着伤害伤痛).jpg"
     },
     {
-      "title": "トゲナシトゲアリ (TOGENASHI TOGEARI) - 名もなき何もかも",
-      "artist": "Unknown Artist",
+      "title": "名もなき何もかも",
+      "artist": "トゲナシトゲアリ (TOGENASHI TOGEARI)",
       "file": "/music/togetoge/トゲナシトゲアリ (TOGENASHI TOGEARI) - 名もなき何もかも.ogg",
       "cover": "/music/togetoge/トゲナシトゲアリ (TOGENASHI TOGEARI) - 名もなき何もかも.jpg"
     },
