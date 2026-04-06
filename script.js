@@ -29,10 +29,16 @@ const LONG_PRESS_DELAY = 200;
 let longPressTimer = null;
 let longPressTriggered = false;
 
+let dragPreviewIndex = -1;
+
+const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2];
+let currentSpeedIndex = 1;
+
 const audio = document.getElementById('audio-player');
 const lyricsContainer = document.getElementById('lyrics-container');
 const lyricsTrack = document.getElementById('lyrics-track');
 const appBg = document.getElementById('app-bg');
+const lyricsOverlay = document.getElementById('lyrics-overlay');
 
 async function init() {
     try {
@@ -56,9 +62,13 @@ async function init() {
         initSearch();
         initLyricsInteraction();
         initControls();
+        initPosterFeature();
         startLyricsAnimationLoop();
         await restoreState();
         window.addEventListener('hashchange', handleRoute);
+
+        const storedRate = parseFloat(localStorage.getItem('music_playback_rate') || '1');
+        setPlaybackRate(storedRate);
     } catch (e) {
         console.error('Init Error:', e);
     }
@@ -125,14 +135,18 @@ function updatePlayerUI(song) {
 
     document.getElementById('full-title').innerText = song.title;
     document.getElementById('full-artist').innerText = song.artist;
-    document.getElementById('full-album').innerText = song.album || 'Unknown Album';
     document.getElementById('full-cover').src = song.cover;
 
-    appBg.style.backgroundImage = `url('${song.cover}')`;
-    appBg.style.opacity = '1';
+    if (appBg) {
+        appBg.style.backgroundImage = `url('${song.cover}')`;
+    }
+
+    applyDynamicThemeFromImage(song.cover);
+    updatePosterContent();
 
     audio.onloadedmetadata = () => {
         document.getElementById('time-duration').innerText = formatTime(audio.duration || 0);
+        updatePosterContent();
     };
 }
 
@@ -151,6 +165,7 @@ async function playSong(index) {
 
     autoFollowLyrics = true;
     currentActiveIndex = -1;
+    dragPreviewIndex = -1;
 
     resetLyricsGestureState();
     velocity = 0;
@@ -185,6 +200,7 @@ function updatePlayState() {
     const iconFull = isPlaying ? 'pause_circle' : 'play_circle';
     document.querySelector('#btn-play-mini span').innerText = icon;
     document.querySelector('#btn-play-full span').innerText = iconFull;
+    document.body.classList.toggle('is-playing', isPlaying);
 }
 
 async function loadLyrics(url) {
@@ -204,47 +220,73 @@ async function loadLyrics(url) {
 }
 
 function parseLyrics(text) {
-    const lines = text.split('\n');
+    const lines = text.split('\n').map(v => v.trim()).filter(Boolean);
     const tempMap = new Map();
 
-    lines.forEach(line => {
+    for (const line of lines) {
         const timeTags = [...line.matchAll(/\[(\d{2}):(\d{2})(\.\d{2,3})?\]/g)];
-        if (!timeTags.length) return;
+        if (!timeTags.length) continue;
 
         const content = line.replace(/\[.*?\]/g, '').trim();
-        if (!content) return;
+        if (!content) continue;
 
-        timeTags.forEach(match => {
+        for (const match of timeTags) {
             const time = parseInt(match[1]) * 60 + parseInt(match[2]) + (match[3] ? parseFloat(match[3]) : 0);
-            if (tempMap.has(time)) {
-                tempMap.set(time, tempMap.get(time) + `<span class="lyric-sub">${content}</span>`);
+
+            if (!tempMap.has(time)) {
+                tempMap.set(time, {
+                    main: content,
+                    subs: []
+                });
             } else {
-                tempMap.set(time, content);
+                tempMap.get(time).subs.push(content);
             }
-        });
-    });
+        }
+    }
 
     lyricsData = Array.from(tempMap.entries())
-        .map(([time, text]) => ({ time, text }))
+        .map(([time, value]) => ({
+            time,
+            main: value.main,
+            subs: value.subs
+        }))
         .sort((a, b) => a.time - b.time);
 
-    lyricsTrack.innerHTML = lyricsData.map((l, i) =>
-        `<div class="lyric-line" id="lrc-${i}" data-time="${l.time}">${l.text}</div>`
-    ).join('');
+    lyricsTrack.innerHTML = lyricsData.map((l, i) => `
+        <div class="lyric-line" id="lrc-${i}" data-time="${l.time}">
+            <div class="lyric-main">
+                <span class="lyric-text lyric-base">${escapeHtml(l.main)}</span>
+                <span class="lyric-text lyric-fill">${escapeHtml(l.main)}</span>
+            </div>
+            ${l.subs.map(sub => `<div class="lyric-sub">${escapeHtml(sub)}</div>`).join('')}
+        </div>
+    `).join('');
 
     requestAnimationFrame(() => {
         autoFollowLyrics = true;
         currentActiveIndex = -1;
+        dragPreviewIndex = -1;
         velocity = 0;
         currentOffset = 0;
         targetOffset = 0;
         updateLyricsByTime(true);
+        updatePseudoWordHighlight();
     });
+}
+
+function escapeHtml(str = '') {
+    return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
 }
 
 function startLyricsAnimationLoop() {
     const tick = () => {
         updateOffsetPhysics();
+        updatePseudoWordHighlight();
         rafId = requestAnimationFrame(tick);
     };
     if (!rafId) tick();
@@ -255,8 +297,11 @@ function updateOffsetPhysics() {
 
     if (isDragging) {
         applyLyricsTransform(currentOffset);
+        updateDragPreviewLine();
         return;
     }
+
+    clearDragPreviewLine();
 
     if (Math.abs(velocity) > 0.02) {
         targetOffset += velocity;
@@ -299,6 +344,8 @@ function resetLyricsGestureState() {
     lastMoveTime = 0;
     longPressTriggered = false;
     lyricsContainer?.classList.remove('dragging');
+    lyricsContainer?.classList.remove('show-guide');
+    clearDragPreviewLine();
 }
 
 function seekToLyricTime(time) {
@@ -322,6 +369,16 @@ function initLyricsInteraction() {
     const enterManualMode = () => {
         autoFollowLyrics = false;
     };
+
+    const syncBtn = document.getElementById('btn-sync-lyrics');
+    if (syncBtn) {
+        syncBtn.onclick = (e) => {
+            e.stopPropagation();
+            autoFollowLyrics = true;
+            velocity = 0;
+            updateLyricsByTime(true);
+        };
+    }
 
     lyricsContainer.addEventListener('wheel', (e) => {
         e.preventDefault();
@@ -376,6 +433,7 @@ function initLyricsInteraction() {
             enterManualMode();
             clearLongPressTimer();
             lyricsContainer.classList.add('dragging');
+            lyricsContainer.classList.add('show-guide');
 
             lastPointerY = e.clientY;
             lastMoveTime = performance.now();
@@ -397,6 +455,8 @@ function initLyricsInteraction() {
 
         lastPointerY = e.clientY;
         lastMoveTime = now;
+
+        updateDragPreviewLine();
     });
 
     lyricsContainer.addEventListener('pointerup', (e) => {
@@ -405,7 +465,15 @@ function initLyricsInteraction() {
         clearLongPressTimer();
 
         if (isDragging) {
-            targetOffset = clampLyricsOffset(targetOffset + velocity * 14);
+            const previewIndex = getCenterLyricIndex();
+            if (previewIndex !== -1) {
+                const time = lyricsData[previewIndex]?.time;
+                clearDragPreviewLine();
+                lyricsContainer.classList.remove('show-guide');
+                seekToLyricTime(time);
+            } else {
+                targetOffset = clampLyricsOffset(targetOffset + velocity * 14);
+            }
         } else {
             if (pointerDownTargetLine) {
                 const time = parseFloat(pointerDownTargetLine.dataset.time);
@@ -420,6 +488,7 @@ function initLyricsInteraction() {
         setTimeout(() => {
             isDragging = false;
             lyricsContainer.classList.remove('dragging');
+            lyricsContainer.classList.remove('show-guide');
         }, 0);
 
         try {
@@ -476,6 +545,7 @@ function updateActiveLyric(index) {
     if (current) current.classList.add('active');
 
     currentActiveIndex = index;
+    updatePosterContent();
 }
 
 function getTargetOffsetByIndex(index) {
@@ -497,6 +567,88 @@ function updateLyricsByTime(forceScroll = false) {
 
     if (autoFollowLyrics || forceScroll) {
         targetOffset = getTargetOffsetByIndex(activeIndex);
+    }
+}
+
+function getCenterLyricIndex() {
+    if (!lyricsData.length) return -1;
+
+    const containerCenter = lyricsContainer.clientHeight / 2;
+    let bestIndex = -1;
+    let minDist = Infinity;
+
+    lyricsData.forEach((_, i) => {
+        const el = document.getElementById(`lrc-${i}`);
+        if (!el) return;
+        const center = el.offsetTop + el.clientHeight / 2 + currentOffset;
+        const dist = Math.abs(center - containerCenter);
+        if (dist < minDist) {
+            minDist = dist;
+            bestIndex = i;
+        }
+    });
+
+    return bestIndex;
+}
+
+function updateDragPreviewLine() {
+    const previewIndex = getCenterLyricIndex();
+    if (previewIndex === dragPreviewIndex) return;
+
+    const prev = document.querySelector('.lyric-line.preview');
+    if (prev) prev.classList.remove('preview');
+
+    const current = document.getElementById(`lrc-${previewIndex}`);
+    if (current) current.classList.add('preview');
+
+    dragPreviewIndex = previewIndex;
+
+    const previewTime = lyricsData[previewIndex]?.time;
+    const previewLabel = document.getElementById('drag-time-label');
+    if (previewLabel && Number.isFinite(previewTime)) {
+        previewLabel.innerText = `${formatTime(previewTime)} 松手跳转`;
+    }
+}
+
+function clearDragPreviewLine() {
+    const prev = document.querySelector('.lyric-line.preview');
+    if (prev) prev.classList.remove('preview');
+    dragPreviewIndex = -1;
+
+    const previewLabel = document.getElementById('drag-time-label');
+    if (previewLabel) {
+        previewLabel.innerText = '';
+    }
+}
+
+function updatePseudoWordHighlight() {
+    if (!lyricsData.length) return;
+
+    for (let i = 0; i < lyricsData.length; i++) {
+        const lineEl = document.getElementById(`lrc-${i}`);
+        if (!lineEl) continue;
+
+        const fill = lineEl.querySelector('.lyric-fill');
+        if (!fill) continue;
+
+        if (i !== currentActiveIndex) {
+            fill.style.clipPath = 'inset(0 100% 0 0)';
+            fill.style.webkitClipPath = 'inset(0 100% 0 0)';
+            continue;
+        }
+
+        const current = lyricsData[i];
+        const next = lyricsData[i + 1];
+        const start = current.time;
+        const end = next ? next.time : start + 4;
+        const duration = Math.max(0.25, end - start);
+        const progress = clamp((audio.currentTime - start) / duration, 0, 1);
+
+        const rightInset = 100 - progress * 100;
+        const clipValue = `inset(0 ${rightInset}% 0 0)`;
+
+        fill.style.clipPath = clipValue;
+        fill.style.webkitClipPath = clipValue;
     }
 }
 
@@ -531,6 +683,29 @@ function initControls() {
     document.getElementById('btn-prev-full').onclick = prevFunc;
     document.getElementById('btn-next-full').onclick = nextFunc;
 
+    const rewindBtn = document.getElementById('btn-rewind-10');
+    const forwardBtn = document.getElementById('btn-forward-10');
+    if (rewindBtn) {
+        rewindBtn.onclick = (e) => {
+            e.stopPropagation();
+            seekRelative(-10);
+        };
+    }
+    if (forwardBtn) {
+        forwardBtn.onclick = (e) => {
+            e.stopPropagation();
+            seekRelative(10);
+        };
+    }
+
+    const speedBtn = document.getElementById('btn-speed');
+    if (speedBtn) {
+        speedBtn.onclick = (e) => {
+            e.stopPropagation();
+            cyclePlaybackSpeed();
+        };
+    }
+
     document.getElementById('full-progress-wrapper').onclick = (e) => {
         e.stopPropagation();
         const rect = e.currentTarget.getBoundingClientRect();
@@ -543,13 +718,13 @@ function initControls() {
     };
 
     document.getElementById('mini-player').onclick = () => {
-        document.getElementById('lyrics-overlay').classList.add('open');
+        lyricsOverlay.classList.add('open');
         requestAnimationFrame(() => updateLyricsByTime(true));
     };
 
     document.getElementById('btn-close-lyrics').onclick = (e) => {
         e.stopPropagation();
-        document.getElementById('lyrics-overlay').classList.remove('open');
+        lyricsOverlay.classList.remove('open');
     };
 
     const volumeBtn = document.getElementById('btn-volume');
@@ -581,6 +756,7 @@ function initControls() {
         document.getElementById('time-current').innerText = formatTime(audio.currentTime);
 
         updateLyricsByTime(false);
+        updatePosterContent();
     });
 
     audio.addEventListener('ended', () => {
@@ -617,6 +793,32 @@ function initControls() {
             closeModal();
         };
     });
+}
+
+function seekRelative(delta) {
+    const duration = audio.duration || 0;
+    audio.currentTime = clamp((audio.currentTime || 0) + delta, 0, duration || Infinity);
+    autoFollowLyrics = true;
+    velocity = 0;
+    updateLyricsByTime(true);
+}
+
+function cyclePlaybackSpeed() {
+    currentSpeedIndex = (currentSpeedIndex + 1) % SPEED_OPTIONS.length;
+    setPlaybackRate(SPEED_OPTIONS[currentSpeedIndex]);
+}
+
+function setPlaybackRate(rate) {
+    audio.playbackRate = rate;
+    const idx = SPEED_OPTIONS.findIndex(v => v === rate);
+    currentSpeedIndex = idx >= 0 ? idx : 1;
+
+    const speedBtn = document.getElementById('btn-speed');
+    if (speedBtn) {
+        speedBtn.querySelector('.speed-text').innerText = `${rate}x`;
+    }
+
+    localStorage.setItem('music_playback_rate', String(rate));
 }
 
 function handleTrackChange(direction, isAuto = false) {
@@ -831,6 +1033,251 @@ window.playFromSearch = (pid, idx) => {
 function formatTime(s) {
     s = Number.isFinite(s) ? s : 0;
     return `${Math.floor(s / 60)}:${Math.floor(s % 60).toString().padStart(2, '0')}`;
+}
+
+async function loadImageForCanvas(src) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.referrerPolicy = 'no-referrer';
+        img.onload = () => resolve(img);
+        img.onerror = reject;
+        img.src = src;
+    });
+}
+
+async function createBlurredPosterBg(imageUrl, options = {}) {
+    const {
+        width = 1200,
+        height = 1800,
+        blur = 32,
+        scale = 1.2,
+        brightness = 0.55
+    } = options;
+
+    const sourceImg = await loadImageForCanvas(imageUrl);
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Canvas context not available');
+
+    const drawWidth = width * scale;
+    const drawHeight = height * scale;
+    const dx = (width - drawWidth) / 2;
+    const dy = (height - drawHeight) / 2;
+
+    ctx.clearRect(0, 0, width, height);
+    ctx.filter = `blur(${blur}px) brightness(${brightness})`;
+    ctx.drawImage(sourceImg, dx, dy, drawWidth, drawHeight);
+    ctx.filter = 'none';
+
+    ctx.fillStyle = 'rgba(10, 10, 16, 0.22)';
+    ctx.fillRect(0, 0, width, height);
+
+    return canvas.toDataURL('image/jpeg', 0.92);
+}
+
+async function preparePosterBlurBackground() {
+    const posterCard = document.getElementById('poster-card');
+    const posterBg = document.getElementById('poster-bg');
+    const song = currentPlaylist[currentIndex];
+
+    if (!posterCard || !posterBg || !song?.cover) return null;
+
+    const rect = posterCard.getBoundingClientRect();
+    const exportWidth = Math.max(1200, Math.round(rect.width * 3));
+    const exportHeight = Math.max(1800, Math.round(rect.height * 3));
+
+    const prevState = {
+        backgroundImage: posterBg.style.backgroundImage,
+        filter: posterBg.style.filter,
+        webkitFilter: posterBg.style.webkitFilter
+    };
+
+    const blurredUrl = await createBlurredPosterBg(song.cover, {
+        width: exportWidth,
+        height: exportHeight,
+        blur: 36,
+        scale: 1.22,
+        brightness: 0.54
+    });
+
+    posterBg.style.backgroundImage = `url("${blurredUrl}")`;
+    posterBg.style.filter = 'none';
+    posterBg.style.webkitFilter = 'none';
+
+    return prevState;
+}
+
+function restorePosterBlurBackground(prevState) {
+    const posterBg = document.getElementById('poster-bg');
+    if (!posterBg || !prevState) return;
+
+    posterBg.style.backgroundImage = prevState.backgroundImage || '';
+    posterBg.style.filter = prevState.filter || '';
+    posterBg.style.webkitFilter = prevState.webkitFilter || '';
+}
+
+async function exportPoster() {
+    const card = document.getElementById('poster-card');
+    const song = currentPlaylist[currentIndex];
+    if (!card) return;
+
+    let prevState = null;
+
+    try {
+        prevState = await preparePosterBlurBackground();
+
+        await new Promise(resolve => requestAnimationFrame(resolve));
+        await new Promise(resolve => setTimeout(resolve, 40));
+
+        const canvas = await html2canvas(card, {
+            backgroundColor: null,
+            scale: Math.min(window.devicePixelRatio || 2, 3),
+            useCORS: true,
+            allowTaint: false
+        });
+
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = `${song?.title || 'poster'}-poster.png`;
+        a.click();
+    } catch (e) {
+        console.error('海报导出失败', e);
+        alert('海报导出失败，请确认封面图片允许跨域访问。');
+    } finally {
+        restorePosterBlurBackground(prevState);
+    }
+}
+
+function initPosterFeature() {
+    const posterBtn = document.getElementById('btn-poster');
+    const posterClose = document.getElementById('poster-close');
+    const posterDownload = document.getElementById('poster-download');
+    const posterModal = document.getElementById('poster-modal');
+    const posterOverlay = document.getElementById('poster-overlay');
+
+    if (posterBtn) {
+        posterBtn.onclick = (e) => {
+            e.stopPropagation();
+            updatePosterContent();
+            posterModal.classList.add('active');
+        };
+    }
+
+    if (posterClose) posterClose.onclick = () => posterModal.classList.remove('active');
+    if (posterOverlay) posterOverlay.onclick = () => posterModal.classList.remove('active');
+
+    if (posterDownload) {
+        posterDownload.onclick = async () => {
+            if (posterDownload.dataset.exporting === '1') return;
+
+            posterDownload.dataset.exporting = '1';
+            posterDownload.disabled = true;
+
+            try {
+                await exportPoster();
+            } finally {
+                posterDownload.dataset.exporting = '0';
+                posterDownload.disabled = false;
+            }
+        };
+    }
+}
+
+function updatePosterContent() {
+    const song = currentPlaylist[currentIndex];
+    if (!song) return;
+
+    const activeLyric = lyricsData[currentActiveIndex]?.main || '正在聆听音乐';
+
+    const cover = document.getElementById('poster-cover');
+    const title = document.getElementById('poster-title');
+    const artist = document.getElementById('poster-artist');
+    const lyric = document.getElementById('poster-lyric');
+    const time = document.getElementById('poster-time');
+    const bg = document.getElementById('poster-bg');
+
+    if (cover) cover.src = song.cover;
+    if (title) title.innerText = song.title;
+    if (artist) artist.innerText = song.artist;
+    if (lyric) lyric.innerText = activeLyric;
+    if (time) time.innerText = `${formatTime(audio.currentTime || 0)} / ${formatTime(audio.duration || 0)}`;
+    if (bg) bg.style.backgroundImage = `url('${song.cover}')`;
+}
+
+function applyDynamicThemeFromImage(imageUrl) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.referrerPolicy = 'no-referrer';
+
+    img.onload = () => {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+            const size = 48;
+            canvas.width = size;
+            canvas.height = size;
+            ctx.drawImage(img, 0, 0, size, size);
+
+            const { data } = ctx.getImageData(0, 0, size, size);
+
+            let r = 0, g = 0, b = 0, count = 0;
+
+            for (let i = 0; i < data.length; i += 4) {
+                const rr = data[i];
+                const gg = data[i + 1];
+                const bb = data[i + 2];
+                const alpha = data[i + 3];
+
+                if (alpha < 125) continue;
+
+                const brightness = (rr * 299 + gg * 587 + bb * 114) / 1000;
+                if (brightness < 28 || brightness > 235) continue;
+
+                r += rr;
+                g += gg;
+                b += bb;
+                count++;
+            }
+
+            if (!count) return;
+
+            r = Math.round(r / count);
+            g = Math.round(g / count);
+            b = Math.round(b / count);
+
+            const enhanced = enhanceColor(r, g, b);
+
+            document.documentElement.style.setProperty('--primary', `rgb(${enhanced.r}, ${enhanced.g}, ${enhanced.b})`);
+            document.documentElement.style.setProperty('--primary-dark', `rgb(${Math.max(0, enhanced.r - 24)}, ${Math.max(0, enhanced.g - 24)}, ${Math.max(0, enhanced.b - 24)})`);
+            document.documentElement.style.setProperty('--theme-r', enhanced.r);
+            document.documentElement.style.setProperty('--theme-g', enhanced.g);
+            document.documentElement.style.setProperty('--theme-b', enhanced.b);
+        } catch (e) {
+            console.warn('主题色提取失败', e);
+        }
+    };
+
+    img.onerror = () => {
+        console.warn('封面加载失败，无法提取主题色');
+    };
+
+    img.src = imageUrl;
+}
+
+function enhanceColor(r, g, b) {
+    const avg = (r + g + b) / 3;
+    const boost = avg < 110 ? 1.22 : 1.08;
+
+    return {
+        r: clamp(Math.round(r * boost), 0, 255),
+        g: clamp(Math.round(g * boost), 0, 255),
+        b: clamp(Math.round(b * boost), 0, 255)
+    };
 }
 
 init();

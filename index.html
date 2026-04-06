@@ -6,10 +6,9 @@
     <title>Material Music Pro</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/material-icons@1.13.12/iconfont/material-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 </head>
 <body>
-    <div class="app-bg" id="app-bg"></div>
-
     <div class="app-container">
         <nav class="navigation-rail">
             <div class="nav-header">
@@ -71,6 +70,8 @@
     </div>
 
     <div class="lyrics-overlay" id="lyrics-overlay">
+        <div class="app-bg" id="app-bg"></div>
+
         <button class="close-btn icon-btn" id="btn-close-lyrics" type="button">
             <span class="material-icons">close</span>
         </button>
@@ -84,12 +85,12 @@
                 <div class="info-container">
                     <h2 id="full-title">歌曲标题</h2>
                     <h3 id="full-artist">艺术家</h3>
-                    <div class="tag" id="full-album">专辑名称</div>
                 </div>
             </div>
 
             <div class="right-side" id="lyrics-right-side">
                 <div id="lyrics-container">
+                    <div class="drag-time-label" id="drag-time-label"></div>
                     <div class="lyrics-track" id="lyrics-track">
                         <p class="lyric-line" style="text-align:center">暂无歌词</p>
                     </div>
@@ -115,18 +116,38 @@
             </div>
 
             <div class="playback-controls">
-                <button class="icon-btn" id="btn-mode" type="button">
+                <button class="icon-btn" id="btn-mode" type="button" title="播放模式">
                     <span class="material-icons">repeat</span>
                 </button>
+
+                <button class="icon-btn" id="btn-rewind-10" type="button" title="后退10秒">
+                    <span class="material-icons">replay_10</span>
+                </button>
+
                 <button class="icon-btn-large" id="btn-prev-full" type="button">
                     <span class="material-icons">skip_previous</span>
                 </button>
+
                 <button class="icon-btn-play" id="btn-play-full" type="button">
                     <span class="material-icons">play_circle</span>
                 </button>
+
                 <button class="icon-btn-large" id="btn-next-full" type="button">
                     <span class="material-icons">skip_next</span>
                 </button>
+
+                <button class="icon-btn" id="btn-forward-10" type="button" title="前进10秒">
+                    <span class="material-icons">forward_10</span>
+                </button>
+
+                <button class="speed-btn" id="btn-speed" type="button" title="播放速度">
+                    <span class="speed-text">1x</span>
+                </button>
+
+                <button class="icon-btn poster-btn" id="btn-poster" type="button" title="歌词海报">
+                    <span class="material-icons">photo_camera</span>
+                </button>
+
                 <button class="icon-btn" id="btn-volume" type="button">
                     <span class="material-icons">volume_up</span>
                 </button>
@@ -176,6 +197,36 @@
     </div>
 
     <div class="drawer-overlay" id="drawer-overlay"></div>
+
+    <div class="poster-modal" id="poster-modal">
+        <div class="poster-overlay" id="poster-overlay"></div>
+        <div class="poster-panel">
+            <div class="poster-actions">
+                <button class="icon-btn" id="poster-close" type="button">
+                    <span class="material-icons">close</span>
+                </button>
+                <button class="icon-btn" id="poster-download" type="button">
+                    <span class="material-icons">download</span>
+                </button>
+            </div>
+
+            <div class="poster-card" id="poster-card">
+                <div class="poster-bg" id="poster-bg"></div>
+                <div class="poster-content">
+                    <img class="poster-cover" id="poster-cover" src="" alt="cover">
+                    <div class="poster-meta">
+                        <h3 id="poster-title">歌曲标题</h3>
+                        <p id="poster-artist">艺术家</p>
+                    </div>
+                    <div class="poster-lyric" id="poster-lyric">正在聆听音乐</div>
+                    <div class="poster-footer">
+                        <span class="poster-brand">Material Music Pro</span>
+                        <span id="poster-time">0:00 / 0:00</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <audio id="audio-player"></audio>
     <script src="script.js"></script>
