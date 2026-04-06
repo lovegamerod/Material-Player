@@ -37,6 +37,21 @@ body.overlay-open {
     overscroll-behavior: none;
 }
 
+html.overlay-open,
+body.overlay-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+}
+
+body.overlay-open .main-content {
+    overflow: hidden !important;
+    -webkit-overflow-scrolling: auto;
+}
+
+body.overlay-open .app-container {
+    overscroll-behavior: none;
+}
+
 .app-container {
     display: flex;
     height: 100vh;

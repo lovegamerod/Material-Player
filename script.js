@@ -40,10 +40,28 @@ const lyricsTrack = document.getElementById('lyrics-track');
 const appBg = document.getElementById('app-bg');
 const lyricsOverlay = document.getElementById('lyrics-overlay');
 
+let lockedMainScrollTop = 0;
+
 function setOverlayOpenState(open) {
+    const mainContent = document.querySelector('.main-content');
+
+    document.documentElement.classList.toggle('overlay-open', open);
     document.body.classList.toggle('overlay-open', open);
+
     if (lyricsOverlay) {
         lyricsOverlay.classList.toggle('open', open);
+    }
+
+    if (mainContent) {
+        if (open) {
+            lockedMainScrollTop = mainContent.scrollTop;
+            mainContent.style.overflow = 'hidden';
+            mainContent.style.touchAction = 'none';
+        } else {
+            mainContent.style.overflow = '';
+            mainContent.style.touchAction = '';
+            mainContent.scrollTop = lockedMainScrollTop;
+        }
     }
 }
 
@@ -389,10 +407,8 @@ function initLyricsInteraction() {
 
     // 阻止歌词页触摸时带动背景滚动
     lyricsOverlay?.addEventListener('touchmove', (e) => {
-        if (!lyricsOverlay.classList.contains('open')) return;
-        if (!e.target.closest('#lyrics-container')) {
-            e.preventDefault();
-        }
+    if (!lyricsOverlay.classList.contains('open')) return;
+    e.preventDefault();
     }, { passive: false });
 
     // 桌面滚轮
@@ -858,8 +874,11 @@ function initControls() {
     };
 
     document.getElementById('mini-player').onclick = () => {
-        setOverlayOpenState(true);
-        requestAnimationFrame(() => updateLyricsByTime(true));
+    resetLyricsGestureState();
+    velocity = 0;
+    autoFollowLyrics = true;
+    setOverlayOpenState(true);
+    requestAnimationFrame(() => updateLyricsByTime(true));
     };
 
     document.getElementById('btn-close-lyrics').onclick = (e) => {
