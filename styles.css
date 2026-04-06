@@ -31,15 +31,15 @@ body {
     overflow: hidden;
 }
 
-body.overlay-open {
-    overflow: hidden;
-    touch-action: none;
-    overscroll-behavior: none;
-}
-
 html.overlay-open,
 body.overlay-open {
     overflow: hidden;
+    overscroll-behavior: none;
+}
+
+body.overlay-open {
+    overflow: hidden;
+    touch-action: none;
     overscroll-behavior: none;
 }
 

@@ -34,13 +34,13 @@ let dragPreviewIndex = -1;
 const SPEED_OPTIONS = [0.75, 1, 1.25, 1.5, 2];
 let currentSpeedIndex = 1;
 
+let lockedMainScrollTop = 0;
+
 const audio = document.getElementById('audio-player');
 const lyricsContainer = document.getElementById('lyrics-container');
 const lyricsTrack = document.getElementById('lyrics-track');
 const appBg = document.getElementById('app-bg');
 const lyricsOverlay = document.getElementById('lyrics-overlay');
-
-let lockedMainScrollTop = 0;
 
 function setOverlayOpenState(open) {
     const mainContent = document.querySelector('.main-content');
@@ -405,13 +405,16 @@ function initLyricsInteraction() {
         };
     }
 
-    // 阻止歌词页触摸时带动背景滚动
-    lyricsOverlay?.addEventListener('touchmove', (e) => {
-    if (!lyricsOverlay.classList.contains('open')) return;
-    e.preventDefault();
+    lyricsOverlay?.addEventListener('touchstart', (e) => {
+        if (!lyricsOverlay.classList.contains('open')) return;
+        e.preventDefault();
     }, { passive: false });
 
-    // 桌面滚轮
+    lyricsOverlay?.addEventListener('touchmove', (e) => {
+        if (!lyricsOverlay.classList.contains('open')) return;
+        e.preventDefault();
+    }, { passive: false });
+
     lyricsContainer.addEventListener('wheel', (e) => {
         e.preventDefault();
         if (!lyricsData.length) return;
@@ -425,7 +428,6 @@ function initLyricsInteraction() {
         targetOffset = clampLyricsOffset(targetOffset);
     }, { passive: false });
 
-    // ========== Pointer 事件：桌面 / 支持 Pointer 的设备 ==========
     lyricsContainer.addEventListener('pointerdown', (e) => {
         if (!lyricsData.length) return;
 
@@ -550,7 +552,6 @@ function initLyricsInteraction() {
         } catch (_) {}
     });
 
-    // ========== Touch 事件：移动端专用 ==========
     let touchActive = false;
     let touchMoved = false;
     let touchStartX = 0;
@@ -874,11 +875,11 @@ function initControls() {
     };
 
     document.getElementById('mini-player').onclick = () => {
-    resetLyricsGestureState();
-    velocity = 0;
-    autoFollowLyrics = true;
-    setOverlayOpenState(true);
-    requestAnimationFrame(() => updateLyricsByTime(true));
+        resetLyricsGestureState();
+        velocity = 0;
+        autoFollowLyrics = true;
+        setOverlayOpenState(true);
+        requestAnimationFrame(() => updateLyricsByTime(true));
     };
 
     document.getElementById('btn-close-lyrics').onclick = (e) => {
