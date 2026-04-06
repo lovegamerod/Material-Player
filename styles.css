@@ -31,6 +31,12 @@ body {
     overflow: hidden;
 }
 
+body.overlay-open {
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
+}
+
 .app-container {
     display: flex;
     height: 100vh;
@@ -127,6 +133,8 @@ body {
     padding: 0 32px;
     overflow-y: auto;
     background: #ffffff;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
 }
 
 .top-bar {
@@ -417,6 +425,8 @@ body {
     visibility: hidden;
     overflow: hidden;
     min-height: 0;
+    overscroll-behavior: none;
+    touch-action: none;
 }
 
 .lyrics-overlay.open {
@@ -568,6 +578,8 @@ body.is-playing .lyrics-overlay.open .app-bg {
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
+    overscroll-behavior: none;
+    touch-action: none;
     mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
     -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 90%, transparent 100%);
 }

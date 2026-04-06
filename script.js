@@ -40,6 +40,13 @@ const lyricsTrack = document.getElementById('lyrics-track');
 const appBg = document.getElementById('app-bg');
 const lyricsOverlay = document.getElementById('lyrics-overlay');
 
+function setOverlayOpenState(open) {
+    document.body.classList.toggle('overlay-open', open);
+    if (lyricsOverlay) {
+        lyricsOverlay.classList.toggle('open', open);
+    }
+}
+
 async function init() {
     try {
         const response = await fetch(`${BASE_PATH}/data.json`);
@@ -380,6 +387,15 @@ function initLyricsInteraction() {
         };
     }
 
+    // 阻止歌词页触摸时带动背景滚动
+    lyricsOverlay?.addEventListener('touchmove', (e) => {
+        if (!lyricsOverlay.classList.contains('open')) return;
+        if (!e.target.closest('#lyrics-container')) {
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    // 桌面滚轮
     lyricsContainer.addEventListener('wheel', (e) => {
         e.preventDefault();
         if (!lyricsData.length) return;
@@ -393,8 +409,13 @@ function initLyricsInteraction() {
         targetOffset = clampLyricsOffset(targetOffset);
     }, { passive: false });
 
+    // ========== Pointer 事件：桌面 / 支持 Pointer 的设备 ==========
     lyricsContainer.addEventListener('pointerdown', (e) => {
         if (!lyricsData.length) return;
+
+        if (e.pointerType !== 'mouse') {
+            e.preventDefault();
+        }
 
         isPointerDown = true;
         isDragging = false;
@@ -423,6 +444,10 @@ function initLyricsInteraction() {
 
     lyricsContainer.addEventListener('pointermove', (e) => {
         if (!isPointerDown) return;
+
+        if (e.pointerType !== 'mouse') {
+            e.preventDefault();
+        }
 
         const totalDx = e.clientX - startPointerX;
         const totalDy = e.clientY - startPointerY;
@@ -456,11 +481,16 @@ function initLyricsInteraction() {
         lastPointerY = e.clientY;
         lastMoveTime = now;
 
+        applyLyricsTransform(currentOffset);
         updateDragPreviewLine();
     });
 
     lyricsContainer.addEventListener('pointerup', (e) => {
         if (!isPointerDown) return;
+
+        if (e.pointerType !== 'mouse') {
+            e.preventDefault();
+        }
 
         clearLongPressTimer();
 
@@ -503,6 +533,116 @@ function initLyricsInteraction() {
             lyricsContainer.releasePointerCapture?.(e.pointerId);
         } catch (_) {}
     });
+
+    // ========== Touch 事件：移动端专用 ==========
+    let touchActive = false;
+    let touchMoved = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchLastY = 0;
+    let touchLastTime = 0;
+    let touchTargetLine = null;
+
+    lyricsContainer.addEventListener('touchstart', (e) => {
+        if (!lyricsData.length) return;
+        if (!e.touches.length) return;
+
+        const t = e.touches[0];
+
+        touchActive = true;
+        touchMoved = false;
+        isDragging = false;
+        touchTargetLine = e.target.closest('.lyric-line');
+
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchLastY = t.clientY;
+        touchLastTime = performance.now();
+
+        velocity = 0;
+        clearLongPressTimer();
+
+        e.preventDefault();
+    }, { passive: false });
+
+    lyricsContainer.addEventListener('touchmove', (e) => {
+        if (!touchActive || !e.touches.length) return;
+
+        const t = e.touches[0];
+        const totalDx = t.clientX - touchStartX;
+        const totalDy = t.clientY - touchStartY;
+        const movedFar = Math.abs(totalDx) > DRAG_THRESHOLD || Math.abs(totalDy) > DRAG_THRESHOLD;
+
+        if (!isDragging && movedFar) {
+            isDragging = true;
+            touchMoved = true;
+            enterManualMode();
+            lyricsContainer.classList.add('dragging');
+            lyricsContainer.classList.add('show-guide');
+
+            touchLastY = t.clientY;
+            touchLastTime = performance.now();
+        }
+
+        if (isDragging) {
+            const now = performance.now();
+            const dy = t.clientY - touchLastY;
+            const dt = Math.max(1, now - touchLastTime);
+
+            currentOffset += dy;
+            currentOffset = clampLyricsOffset(currentOffset);
+            targetOffset = currentOffset;
+
+            velocity = dy / dt * 16;
+            velocity = clamp(velocity, -4.5, 4.5);
+
+            touchLastY = t.clientY;
+            touchLastTime = now;
+
+            applyLyricsTransform(currentOffset);
+            updateDragPreviewLine();
+        }
+
+        e.preventDefault();
+    }, { passive: false });
+
+    lyricsContainer.addEventListener('touchend', (e) => {
+        if (!touchActive) return;
+
+        if (isDragging) {
+            const previewIndex = getCenterLyricIndex();
+            if (previewIndex !== -1) {
+                const time = lyricsData[previewIndex]?.time;
+                clearDragPreviewLine();
+                lyricsContainer.classList.remove('show-guide');
+                seekToLyricTime(time);
+            } else {
+                targetOffset = clampLyricsOffset(targetOffset + velocity * 14);
+            }
+        } else if (!touchMoved && touchTargetLine) {
+            const time = parseFloat(touchTargetLine.dataset.time);
+            seekToLyricTime(time);
+        }
+
+        touchActive = false;
+        touchMoved = false;
+        touchTargetLine = null;
+
+        setTimeout(() => {
+            isDragging = false;
+            lyricsContainer.classList.remove('dragging');
+            lyricsContainer.classList.remove('show-guide');
+        }, 0);
+
+        e.preventDefault();
+    }, { passive: false });
+
+    lyricsContainer.addEventListener('touchcancel', () => {
+        touchActive = false;
+        touchMoved = false;
+        touchTargetLine = null;
+        resetLyricsGestureState();
+    }, { passive: false });
 }
 
 function clampLyricsOffset(offset) {
@@ -718,13 +858,13 @@ function initControls() {
     };
 
     document.getElementById('mini-player').onclick = () => {
-        lyricsOverlay.classList.add('open');
+        setOverlayOpenState(true);
         requestAnimationFrame(() => updateLyricsByTime(true));
     };
 
     document.getElementById('btn-close-lyrics').onclick = (e) => {
         e.stopPropagation();
-        lyricsOverlay.classList.remove('open');
+        setOverlayOpenState(false);
     };
 
     const volumeBtn = document.getElementById('btn-volume');
