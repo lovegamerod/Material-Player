@@ -405,14 +405,17 @@ function initLyricsInteraction() {
         };
     }
 
-    lyricsOverlay?.addEventListener('touchstart', (e) => {
-        if (!lyricsOverlay.classList.contains('open')) return;
-        e.preventDefault();
-    }, { passive: false });
-
+    // 只阻止歌词页空白区域的滚动穿透，不拦截按钮点击
     lyricsOverlay?.addEventListener('touchmove', (e) => {
         if (!lyricsOverlay.classList.contains('open')) return;
-        e.preventDefault();
+
+        const interactive = e.target.closest(
+            'button, .icon-btn, .icon-btn-filled, .icon-btn-large, .icon-btn-play, .sync-lyrics-btn, .progress-bar-wrapper, .speed-btn, .mode-item'
+        );
+
+        if (!interactive) {
+            e.preventDefault();
+        }
     }, { passive: false });
 
     lyricsContainer.addEventListener('wheel', (e) => {
