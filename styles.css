@@ -233,6 +233,21 @@ body.overlay-open .app-container {
     font-weight: 500;
     margin-bottom: 16px;
     color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.refresh-btn {
+    width: 28px;
+    height: 28px;
+    min-width: unset;
+    padding: 0;
+    opacity: 0.6;
+}
+
+.refresh-btn:hover {
+    opacity: 1;
 }
 
 .song-list-container {

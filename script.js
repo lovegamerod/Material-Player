@@ -1071,7 +1071,7 @@ function renderHome() {
     `;
 
     if (recentlyPlayed.length > 0) {
-        html += `<div class="section-title">最近播放</div>`;
+        html += `<div class="section-title">最近播放<button class="icon-btn refresh-btn" onclick="loadRecentlyPlayed();renderHome();" title="刷新播放记录"><span class="material-icons" style="font-size:18px">refresh</span></button></div>`;
         html += '<div class="song-list-container">';
         recentlyPlayed.forEach((song, i) => {
             html += `
@@ -1111,7 +1111,7 @@ window.playFromRecent = (index) => {
 
     if (foundSong && foundSong.playlistId && playlists[foundSong.playlistId]) {
         currentPlaylist = playlists[foundSong.playlistId];
-        playSong(foundSong.songIndex);
+        playSong(foundSong.songIndex).then(() => renderHome());
     }
 };
 
